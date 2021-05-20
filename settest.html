@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8" />
-    <title>Gamedev Canvas Workshop</title>
+    <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
+    <title>SET Gamedev Canvas</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <style>
         canvas { width: 200px; height: 110px; border: 1px solid #000000; border-radius:6px; margin: 3px 3px auto;}
@@ -39,7 +39,7 @@
 
     draw(ctx, 3, "D", "P", "H");
     draw(ctx1, 2, "W", "G", "F");
-    draw(ctx2, 3, "C", "R", "B");
+    draw(ctx2, 1, "C", "R", "H");
 
 
     function ctx_D(ctx, startPoint) {
@@ -51,21 +51,20 @@
     }
 
     function ctx_DH(ctx, startPoint) {
-        for(var i = 0; i < 9; i++){
+        for(var i = 0; i < 17; i++){
             var x1 =0, x2 = 0;
-            var y = 35 + (i*10);
-            if(i<5){
-                x1 = startPoint +20 - (i*5);
-                x2 = x1+((i+1)*10);
+            var y = 35 + (i*5);
+            if(i<8){
+                x1 = startPoint +20 - (i*2.5);
+                x2 = x1+((i+2)*5);
             } else {
-                x1 = startPoint -20 + (i*5);
-                x2 = x1+((9-i)*10);
+                x1 = startPoint -20 + (i*2.5);
+                x2 = x1+((18-i)*5);
             }
             ctx.moveTo(x1, y);
             ctx.lineTo(x2, y);
         }
     }
-
 
     function ctx_C(ctx, startPoint) {
         ctx.moveTo(startPoint, 50);
@@ -75,6 +74,22 @@
         ctx.lineTo(startPoint+50, 50);
         ctx.arcTo(startPoint+50, 25, startPoint+25, 25, 25);
         ctx.arcTo(startPoint, 25, startPoint, 50, 25);
+    }
+
+
+    function ctx_CH(ctx, startPoint) {
+        for(var i = 0; i < 2; i++){
+            ctx.moveTo(startPoint + ((2-i)*5) , 30 + (i*5));
+            ctx.lineTo(startPoint + 50-((2-i)*5) , 30 + (i*5));
+        }
+        for(var i = 0; i < 15; i++){
+            ctx.moveTo(startPoint, 40 + (i*5));
+            ctx.lineTo(startPoint + 50, 40 + (i*5));
+        }
+        for(var i = 0; i < 2; i++){
+            ctx.moveTo(startPoint + ((i+1)*5) , 115 + (i*5));
+            ctx.lineTo(startPoint + 50 - ((i+1)*5) , 115 + (i*5));
+        }
     }
 
     function ctx_W(ctx, startPoint) {
@@ -93,30 +108,13 @@
         // ctx.fillStyle = '#ea9f42';
         // ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        ctx.beginPath();
-        ctx.lineWidth = 4;
-
-        var x, i;
+        var x;
         if(amount == 1){
             x = [125];
         } else if(amount == 2){
             x = [80, 170];
         } else if(amount == 3){
             x = [50, 125, 200];
-        }
-
-        if (shape == "D") {
-            for(i = 0; i < x.length; i++){
-                ctx_D(ctx, x[i]);
-            }
-        } else if (shape == "C") {
-            for(i = 0; i < x.length; i++){
-                ctx_C(ctx, x[i]);
-            }
-        } else if (shape == "W") {
-            for(i = 0; i < x.length; i++){
-                ctx_W(ctx, x[i]);
-            }
         }
 
         if(color == "R"){
@@ -129,19 +127,43 @@
             ctx.strokeStyle="purple";
             ctx.fillStyle="purple";
         }
-        ctx.stroke();
-
         if(stuff == "B"){
             ctx.fillStyle="white";
-        } else if(stuff == "H"){
-            //todo
-            ctx.beginPath();
-            ctx.lineWidth = 2;
-            ctx_DH(ctx, 125);
-        } else if(stuff == "P"){
+        }
+
+        ctx.beginPath();
+        ctx.lineWidth = 4;
+        for(var i = 0; i < x.length; i++) {
+            if (shape == "D") {
+                ctx_D(ctx, x[i]);
+            } else if (shape == "C") {
+                ctx_C(ctx, x[i]);
+            } else if (shape == "W") {
+                ctx_W(ctx, x[i]);
+            }
         }
         ctx.stroke();
-        ctx.fill();
+
+        if (stuff == "H") {
+            ctx.beginPath();
+            ctx.lineWidth = 1;
+            for (var i = 0; i < x.length; i++) {
+                if (shape == "D") {
+                    ctx_DH(ctx, x[i]);
+                } else if (shape == "C") {
+                    ctx_CH(ctx, x[i]);
+                }
+            }
+            ctx.stroke();
+        }
+
+
+        if(stuff == "B"){
+            // ctx.fillStyle="white";
+        } else if(stuff == "H"){
+        } else if(stuff == "F"){
+            ctx.fill();
+        }
     }
 </script>
 </html>
