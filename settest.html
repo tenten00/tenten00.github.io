@@ -1,113 +1,156 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, telephone=no">
     <title>SET Gamedev Canvas</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <style>
-        canvas { width: 200px; height: 110px; border: 1px solid #000000; border-radius:6px; margin: 3px 3px auto;}
-        .active { border: 3px solid #000000;}
+        canvas { width: 200px; height: 120px; border: 1px solid #000000; border-radius:6px; margin: 2px 2px auto;}
+        .active { border: 2px solid #000000;}
+
+        .box { width: 100%; text-align:center;}
+        .box canvas {
+            width: 29%;
+            height: 120%;
+            padding-bottom: 0.7%;
+        }
     </style>
 </head>
 <body>
-
-    <canvas id="myCanvas"></canvas>
-    <canvas id="myCanvas1"></canvas>
-
-    <br>
-    <canvas id="myCanvas2"></canvas>
-
+    <div class="box">
+        <button onclick="addCanvas(3)">+++3</button><br>
+    </div>
 </body>
 
 
 <script>
-    $("canvas").click(function () {
-        if($(this).hasClass("active")){
-            $(this).removeClass("active");
-        } else {
-            $(this).addClass("active");
+    var setCard;
+    Array.prototype.remove = function(dx) {
+        if(isNaN(dx) || dx > this.length){
+            return false;
         }
+
+        for(var i = 0, n = 0; i < this.length; i++) {
+            if(this[i] != this[dx]) {
+                this[n++] = this[i];
+            }
+        }
+        this.length -= 1;
+    };
+
+    $(document).ready(function () {
+        setCard = ["C1RB", "C1RH", "C1RF", "C1GB", "C1GH", "C1GF", "C1PB", "C1PH", "C1PF"
+            , "C2RB", "C2RH", "C2RF", "C2GB", "C2GH", "C2GF", "C2PB", "C2PH", "C2PF"
+            , "C3RB", "C3RH", "C3RF", "C3GB", "C3GH", "C3GF", "C3PB", "C3PH", "C3PF"
+            , "D1RB", "D1RH", "D1RF", "D1GB", "D1GH", "D1GF", "D1PB", "D1PH", "D1PF"
+            , "D2RB", "D2RH", "D2RF", "D2GB", "D2GH", "D2GF", "D2PB", "D2PH", "D2PF"
+            , "D3RB", "D3RH", "D3RF", "D3GB", "D3GH", "D3GF", "D3PB", "D3PH", "D3PF"
+            , "W1RB", "W1RH", "W1RF", "W1GB", "W1GH", "W1GF", "W1PB", "W1PH", "W1PF"
+            , "W2RB", "W2RH", "W2RF", "W2GB", "W2GH", "W2GF", "W2PB", "W2PH", "W2PF"
+            , "W3RB", "W3RH", "W3RF", "W3GB", "W3GH", "W3GF", "W3PB", "W3PH", "W3PF"];
+
+
+        addCanvas(12);
+
+        $("canvas").click(function () {
+            if ($(this).hasClass("active")) {
+                $(this).removeClass("active");
+            } else {
+                if ($("canvas.active").length < 3) {
+                    $(this).addClass("active");
+                }
+            }
+
+            // logic
+            if ($("canvas.active").length == 3){
+                var c1 = $("canvas.active")[0];
+                var c2 = $("canvas.active")[1];
+                var c3 = $("canvas.active")[2];
+
+                var s1 = c1.getAttribute("shape").split("");
+                var s2 = c2.getAttribute("shape").split("");
+                var s3 = c3.getAttribute("shape").split("");
+
+                var arr_shape = [s1[0], s2[0], s3[0]];
+                var arr_amount = [s1[1], s2[1], s3[1]];
+                var arr_color = [s1[2], s2[2], s3[2]];
+                var arr_stuff = [s1[3], s2[3], s3[3]];
+                arr_shape.sort();
+                arr_amount.sort();
+                arr_color.sort();
+                arr_stuff.sort();
+                var shape = Array.from(new Set(arr_shape)).join('');
+                var amount = Array.from(new Set(arr_amount)).join('');
+                var color = Array.from(new Set(arr_color)).join('');
+                var stuff = Array.from(new Set(arr_stuff)).join('');
+
+                console.log(shape + "@" +amount +"@"+color + "@" + stuff);
+
+                if(shape.length == 1 || shape =="CDW"){
+                    if(amount.length == 1 || amount =="123"){
+                        if(color.length == 1 || color =="GPR") {
+                            if(stuff.length == 1 || stuff =="BFH") {
+                                clearCanvas(c1.getAttribute("id"));
+                                clearCanvas(c2.getAttribute("id"));
+                                clearCanvas(c3.getAttribute("id"));
+
+                                addCanvas(3);
+                            }
+                        }
+                    }
+                }
+
+            }
+        });
     });
 
-    var canvas = document.getElementById("myCanvas");
-    var ctx = canvas.getContext("2d");
-    var canvas1 = document.getElementById("myCanvas1");
-    var ctx1 = canvas1.getContext("2d");
-    var canvas2 = document.getElementById("myCanvas2");
-    var ctx2 = canvas2.getContext("2d");
+    function clearCanvas(card_id) {
+        var canvas = document.getElementById(card_id);
+        var ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-
-    draw(ctx, 3, "D", "P", "H");
-    draw(ctx1, 2, "W", "G", "F");
-    draw(ctx2, 1, "C", "R", "H");
-
-
-    function ctx_D(ctx, startPoint) {
-        ctx.moveTo(startPoint, 75);
-        ctx.lineTo(startPoint+25, 25);
-        ctx.lineTo(startPoint+50, 75);
-        ctx.lineTo(startPoint+25, 125);
-        ctx.lineTo(startPoint, 75);
+        canvas.setAttribute("shape", "");
+        var obj = $("#" +card_id);
+        obj.removeClass("active");
     }
 
-    function ctx_DH(ctx, startPoint) {
-        for(var i = 0; i < 17; i++){
-            var x1 =0, x2 = 0;
-            var y = 35 + (i*5);
-            if(i<8){
-                x1 = startPoint +20 - (i*2.5);
-                x2 = x1+((i+2)*5);
-            } else {
-                x1 = startPoint -20 + (i*2.5);
-                x2 = x1+((18-i)*5);
+    function addCanvas(amount) {
+        var card_num = $("canvas").length;
+        if(card_num >= 18){
+            alert("那麼多還找不到，太蠢了吧!!!hahaha~~~~");
+            return false;
+        }
+        for(var i = card_num; i< (card_num+amount); i++){
+            var canvas = document.createElement("canvas");
+            var card_id = "card" + i;
+            canvas.setAttribute("id", card_id);
+            $("div.box").append(canvas);
+            if((i+1) % 3 == 0){
+                $("div.box").append("<br>");
             }
-            ctx.moveTo(x1, y);
-            ctx.lineTo(x2, y);
+            setRandomShape(card_id);
         }
     }
 
-    function ctx_C(ctx, startPoint) {
-        ctx.moveTo(startPoint, 50);
-        ctx.lineTo(startPoint, 100);
-        ctx.arcTo(startPoint, 125, startPoint+25, 125, 25);
-        ctx.arcTo(startPoint+50, 125, startPoint+50, 100, 25);
-        ctx.lineTo(startPoint+50, 50);
-        ctx.arcTo(startPoint+50, 25, startPoint+25, 25, 25);
-        ctx.arcTo(startPoint, 25, startPoint, 50, 25);
+    function getRandom() {
+        return Math.floor(Math.random() * setCard.length);
     }
+    function setRandomShape(card_id) {
+        var n = getRandom();
+        var shape = setCard[n];
+        setCard.remove(n);
 
-
-    function ctx_CH(ctx, startPoint) {
-        for(var i = 0; i < 2; i++){
-            ctx.moveTo(startPoint + ((2-i)*5) , 30 + (i*5));
-            ctx.lineTo(startPoint + 50-((2-i)*5) , 30 + (i*5));
-        }
-        for(var i = 0; i < 15; i++){
-            ctx.moveTo(startPoint, 40 + (i*5));
-            ctx.lineTo(startPoint + 50, 40 + (i*5));
-        }
-        for(var i = 0; i < 2; i++){
-            ctx.moveTo(startPoint + ((i+1)*5) , 115 + (i*5));
-            ctx.lineTo(startPoint + 50 - ((i+1)*5) , 115 + (i*5));
-        }
-    }
-
-    function ctx_W(ctx, startPoint) {
-        ctx.moveTo(startPoint, 25);
-        ctx.quadraticCurveTo(startPoint+48, 22, startPoint+48, 50);
-        ctx.quadraticCurveTo(startPoint+46, 63, startPoint+38, 80);
-        ctx.quadraticCurveTo(startPoint+23, 100, startPoint+48, 120);
-
-        ctx.quadraticCurveTo(startPoint-17, 120, startPoint+3, 80);
-        ctx.quadraticCurveTo(startPoint+13, 60, startPoint+13, 50);
-        ctx.quadraticCurveTo(startPoint+18, 30, startPoint-5, 22);
+        //draw
+        var canvas = document.getElementById(card_id);
+        canvas.setAttribute("shape", shape);
+        var ctx = canvas.getContext("2d");
+        shape = shape.split("");
+        draw(ctx, shape[1], shape[0], shape[2], shape[3]);
     }
 
     // C 橢圓型, D菱形, W波浪 @ R紅色, G綠色, P紫色 @ B空白, H斜線, F填滿
     function draw(ctx, amount, shape, color, stuff) {
-        // ctx.fillStyle = '#ea9f42';
-        // ctx.fillRect(0, 0, canvas.width, canvas.height);
-
         var x;
         if(amount == 1){
             x = [125];
@@ -118,14 +161,17 @@
         }
 
         if(color == "R"){
-            ctx.strokeStyle="red";
-            ctx.fillStyle="red";
+            var colorCode = "#ff3c3c";
+            ctx.strokeStyle=colorCode;
+            ctx.fillStyle=colorCode;
         } else if(color == "G"){
-            ctx.strokeStyle="green";
-            ctx.fillStyle="green";
+            var colorCode = "#14a510";
+            ctx.strokeStyle=colorCode;
+            ctx.fillStyle=colorCode;
         } else if(color == "P"){
-            ctx.strokeStyle="purple";
-            ctx.fillStyle="purple";
+            var colorCode = "#5f00b1";
+            ctx.strokeStyle=colorCode;
+            ctx.fillStyle=colorCode;
         }
         if(stuff == "B"){
             ctx.fillStyle="white";
@@ -152,6 +198,8 @@
                     ctx_DH(ctx, x[i]);
                 } else if (shape == "C") {
                     ctx_CH(ctx, x[i]);
+                } else if (shape == "W") {
+                    ctx_WH(ctx, x[i]);
                 }
             }
             ctx.stroke();
@@ -163,6 +211,96 @@
         } else if(stuff == "H"){
         } else if(stuff == "F"){
             ctx.fill();
+        }
+    }
+
+    //菱形
+    function ctx_D(ctx, startPoint) {
+        ctx.moveTo(startPoint, 75);
+        ctx.lineTo(startPoint+25, 25);
+        ctx.lineTo(startPoint+50, 75);
+        ctx.lineTo(startPoint+25, 125);
+        ctx.lineTo(startPoint, 75);
+    }
+
+    //菱形H
+    function ctx_DH(ctx, startPoint) {
+        for(var i = 0; i < 17; i++){
+            var x1 =0, x2 = 0;
+            var y = 35 + (i*5);
+            if(i<8){
+                x1 = startPoint +20 - (i*2.5);
+                x2 = x1+((i+2)*5);
+            } else {
+                x1 = startPoint -20 + (i*2.5);
+                x2 = x1+((18-i)*5);
+            }
+            ctx.moveTo(x1, y);
+            ctx.lineTo(x2, y);
+        }
+    }
+
+    //圓形
+    function ctx_C(ctx, startPoint) {
+        ctx.moveTo(startPoint, 50);
+        ctx.lineTo(startPoint, 100);
+        ctx.arcTo(startPoint, 125, startPoint+25, 125, 25);
+        ctx.arcTo(startPoint+50, 125, startPoint+50, 100, 25);
+        ctx.lineTo(startPoint+50, 50);
+        ctx.arcTo(startPoint+50, 25, startPoint+25, 25, 25);
+        ctx.arcTo(startPoint, 25, startPoint, 50, 25);
+    }
+
+    //圓形H
+    function ctx_CH(ctx, startPoint) {
+        for(var i = 0; i < 2; i++){
+            ctx.moveTo(startPoint + ((2-i)*5) , 30 + (i*5));
+            ctx.lineTo(startPoint + 50-((2-i)*5) , 30 + (i*5));
+        }
+        for(var i = 0; i < 15; i++){
+            ctx.moveTo(startPoint, 40 + (i*5));
+            ctx.lineTo(startPoint + 50, 40 + (i*5));
+        }
+        for(var i = 0; i < 2; i++){
+            ctx.moveTo(startPoint + ((i+1)*5) , 115 + (i*5));
+            ctx.lineTo(startPoint + 50 - ((i+1)*5) , 115 + (i*5));
+        }
+    }
+
+    //波浪
+    function ctx_W(ctx, startPoint) {
+        ctx.moveTo(startPoint, 25);
+        ctx.quadraticCurveTo(startPoint+48, 22, startPoint+48, 50);
+        ctx.quadraticCurveTo(startPoint+44, 63, startPoint+38, 80);
+        ctx.quadraticCurveTo(startPoint+26, 100, startPoint+48, 120);
+
+        ctx.quadraticCurveTo(startPoint-17, 120, startPoint+3, 80);
+        ctx.quadraticCurveTo(startPoint+13, 60, startPoint+13, 50);
+        ctx.quadraticCurveTo(startPoint+18, 30, startPoint-5, 22);
+    }
+
+    //波浪H
+    function ctx_WH(ctx, startPoint) {
+        for(var i = 0; i < 18; i++){
+            if(i<3) {
+                ctx.moveTo(startPoint + ((i + 1) * 5), 30 + (i * 5));
+                ctx.lineTo(startPoint + 30 + ((i + 1) * 5), 30 + (i * 5));
+            } else if(i<5){
+                ctx.moveTo(startPoint + ((i+1)*3), 30 + (i * 5));
+                ctx.lineTo(startPoint + 30 + ((i+1)*4), 30 + (i * 5));
+            } else if(i<9){
+                ctx.moveTo(startPoint + ((10-i)*3), 30 + (i * 5));
+                ctx.lineTo(startPoint + 44 , 30 + (i * 5));
+            } else if(i<10){
+                ctx.moveTo(startPoint + ((10-i)*3), 30 + (i * 5));
+                ctx.lineTo(startPoint + 42 , 30 + (i * 5));
+            } else if(i>15){
+                ctx.moveTo(startPoint + ((i-15) * 5), 30 + (i * 5));
+                ctx.lineTo(startPoint + 42 , 30 + (i * 5));
+            } else {
+                ctx.moveTo(startPoint, 30 + (i * 5));
+                ctx.lineTo(startPoint + 35, 30 + (i * 5));
+            }
         }
     }
 </script>
