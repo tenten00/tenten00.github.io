@@ -53,7 +53,7 @@
 
         addCanvas(12);
 
-        $("canvas").click(function () {
+        $("div.box").on('click', "canvas", function () {
             if ($(this).hasClass("active")) {
                 $(this).removeClass("active");
             } else {
@@ -118,7 +118,7 @@
     function addCanvas(amount) {
         var card_num = $("canvas").length;
         if(card_num >= 18){
-            alert("那麼多還找不到，太蠢了吧!!!hahaha~~~~");
+            alert("那麼多還找不到，太蠢了吧!!!\n hahaha~~~~");
             return false;
         }
         for(var i = card_num; i< (card_num+amount); i++){
