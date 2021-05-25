@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, user-scalable=no, telephone=no">
+    <title>SET Gamedev Canvas</title>
+    <script src="https://kit.fontawesome.com/a9fa307fe5.js" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <style>
+        body {
+            font-family: "Apple LiGothic Medium", "WenQuanYi Zen Hei", "LiHei Pro", "Microsoft JhengHei", Arial, sans-serif;
+        }
+        canvas { width: 33%; height: 120px; border: 1px solid #8E8E8E; border-radius:10px; margin: 2px 2px auto;}
+        .active { border: 2px solid #000000;}
+        .tip { border: 2px solid #fdaa51;}
+
+        .center { width: 100%; text-align: center;}
+        .center div {margin:0 auto;}
+
+        @media screen and (max-height: 500px) {
+            .box {
+                width: 45%;
+            }
+        }
+
+        @media screen and (min-height: 1000px) {
+            .box {
+                width: 100%;
+            }
+        }
+
+        @media screen and (min-width: 1000px) and (max-width: 1400px) and (max-height: 1024px) {
+            .box {
+                width: 70%;
+            }
+        }
+        @media screen and (min-width: 1400px) {
+            .box {
+                width: 50%;
+            }
+        }
+
+        .box canvas {
+            width: 29%;
+            height: 120%;
+            padding-bottom: 0.7%;
+        }
+    </style>
+</head>
+<body>
+    <div class="center">
+        <div>
+            <i class="fas fa-history fa-2x" style="color:#3dc609" onclick="reSet()"></i>&nbsp;
+            <span style="color:red">計時:<span id="time">00:00:00</span></span>
+            <div style="float:right;">
+                <i class="fas fa-plus-square fa-2x" style="color:#4b94e0" onclick="addCanvas(3)"></i>&nbsp;
+                <span>牌庫剩餘：<span id="setCard_num">0</span></span>&nbsp;&nbsp;
+                <i id="tip" class="fas fa-question-circle fa-2x" style="color:#fdaa51;" onclick="tipSet(true)"></i>
+            </div>
+        </div>
+        <hr>
+        <div class="box"></div>
+    </div>
+</body>
+<script>
+    var timerID;
+    var tipMsg = true;
+    var deck;
+    var temp = new Date();
+    Array.prototype.remove = function(dx) {
+        if(isNaN(dx) || dx > this.length){
+            return false;
+        }
+        for(var i = 0, n = 0; i < this.length; i++) {
+            if(this[i] != this[dx]) {
+                this[n++] = this[i];
+            }
+        }
+        if(this.length != 0) {
+            this.length -= 1;
+        }
+    };
+
+    Date.prototype.Myformat = function(){
+        return ("0"+ this.getUTCHours()).slice(-2)+":"+("0"+this.getUTCMinutes()).slice(-2)+":"+("0"+this.getUTCSeconds()).slice(-2)
+    }
+
+    function getUrlParam(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null ) return unescape(r[2]); return  null ;
+    }
+
+    function checktimer(){
+        var now = new Date(),
+            diff = new Date(now -temp);
+        document.getElementById("time").innerText = diff.Myformat();
+    }
+
+    $(document).ready(function () {
+        if(getUrlParam("tip") == "Y"){
+            tipMsg = false;
+        }
+
+        $("div.box").on('click', "canvas", function () {
+            $(this).removeClass("tip");
+            if ($(this).hasClass("active")) {
+                $(this).removeClass("active");
+            } else {
+                if ($("canvas.active").length < 3) {
+                    $(this).addClass("active");
+                }
+            }
+
+            if ($("canvas.active").length == 3) {
+                var c1 = $("canvas.active").eq(0);
+                var c2 = $("canvas.active").eq(1);
+                var c3 = $("canvas.active").eq(2);
+
+                if(setLogic(c1, c2, c3)){
+                    clearCanvas(c1.attr("id"));
+                    clearCanvas(c2.attr("id"));
+                    clearCanvas(c3.attr("id"));
+
+                    reCanvas();
+                }
+            }
+        });
+
+        reSet();
+    });
+
+    function reSet() {
+        clearTimeout(timerID);
+        timerID = setInterval(checktimer, 1000);
+        temp = new Date();
+        deck = ["C1RB", "C1RH", "C1RF", "C1GB", "C1GH", "C1GF", "C1PB", "C1PH", "C1PF"
+            , "C2RB", "C2RH", "C2RF", "C2GB", "C2GH", "C2GF", "C2PB", "C2PH", "C2PF"
+            , "C3RB", "C3RH", "C3RF", "C3GB", "C3GH", "C3GF", "C3PB", "C3PH", "C3PF"
+            , "D1RB", "D1RH", "D1RF", "D1GB", "D1GH", "D1GF", "D1PB", "D1PH", "D1PF"
+            , "D2RB", "D2RH", "D2RF", "D2GB", "D2GH", "D2GF", "D2PB", "D2PH", "D2PF"
+            , "D3RB", "D3RH", "D3RF", "D3GB", "D3GH", "D3GF", "D3PB", "D3PH", "D3PF"
+            , "W1RB", "W1RH", "W1RF", "W1GB", "W1GH", "W1GF", "W1PB", "W1PH", "W1PF"
+            , "W2RB", "W2RH", "W2RF", "W2GB", "W2GH", "W2GF", "W2PB", "W2PH", "W2PF"
+            , "W3RB", "W3RH", "W3RF", "W3GB", "W3GH", "W3GF", "W3PB", "W3PH", "W3PF"];
+        $("div.box").empty();
+        addCanvas(12, true);
+    }
+
+    function addCanvas(amount) {
+        if(deck.length == 0) {
+            alert("沒牌了!!!補啥補!!!\n還不快找!!!!");
+            return false;
+        }
+        var card_num = $("canvas").length;
+        if(card_num >= 18){
+            alert("那麼多還找不到，太蠢了吧!!!\n hahaha~~~~");
+            return false;
+        }
+        for(var i = card_num; i< (card_num+amount); i++){
+            var canvas = document.createElement("canvas");
+            var card_id = "card_" + i;
+            canvas.setAttribute("id", card_id);
+            $("div.box").append(canvas);
+            setRandomShape(card_id, true);
+        }
+    }
+
+    function setLogic(c1, c2, c3) {
+        var s1 = c1.attr("shape").split("");
+        var s2 = c2.attr("shape").split("");
+        var s3 = c3.attr("shape").split("");
+
+        var arr_shape = [s1[0], s2[0], s3[0]];
+        var arr_amount = [s1[1], s2[1], s3[1]];
+        var arr_color = [s1[2], s2[2], s3[2]];
+        var arr_stuff = [s1[3], s2[3], s3[3]];
+        arr_shape.sort();
+        arr_amount.sort();
+        arr_color.sort();
+        arr_stuff.sort();
+        var shape = Array.from(new Set(arr_shape)).join('');
+        var amount = Array.from(new Set(arr_amount)).join('');
+        var color = Array.from(new Set(arr_color)).join('');
+        var stuff = Array.from(new Set(arr_stuff)).join('');
+
+        if(shape.length == 1 || shape =="CDW"){
+            if(amount.length == 1 || amount =="123"){
+                if(color.length == 1 || color =="GPR") {
+                    if(stuff.length == 1 || stuff =="BFH") {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    function clearCanvas(card_id) {
+        var canvas = document.getElementById(card_id);
+        var ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        canvas.setAttribute("shape", "");
+        var obj = $("#" +card_id);
+        obj.removeClass("active");
+    }
+
+    function reCanvas() {
+        $("canvas:gt(11)[shape='']").each(function () {
+            $(this).remove();
+        });
+        $("canvas[shape='']").each(function () {
+            setRandomShape($(this).attr("id"), false);
+        });
+        $("canvas:gt(11)").each(function () {
+            $(this).attr("id", "card_" + $(this).index())
+        });
+
+        if(deck.length == 0) {
+            $("canvas[shape='']").each(function () {
+                $(this).remove();
+            });
+            $("canvas").each(function () {
+                $(this).attr("id", "card_" + $(this).index())
+            });
+            if(!tipSet(false)){
+                clearTimeout(timerID);
+                alert("你花了好久...(σﾟ∀ﾟ)σ\n然後終於玩完了~~~\n" + "花費時間："+$("#time").text());
+            }
+        }
+    }
+
+    function tipSet(isShowTip) {
+        var card_num = $("canvas").length;
+        for(var i = 0; i< (card_num-2); i++){
+            for(var j = (i+1); j< (card_num-1); j++){
+                for(var k = (j+1); k< card_num; k++){
+
+                    var c1 = $("canvas[id='card_"+i+"'] ");
+                    var c2 = $("canvas[id='card_"+j+"'] ");
+                    var c3 = $("canvas[id='card_"+k+"'] ");
+
+                    if(setLogic(c1, c2, c3)){
+                        if(isShowTip) {
+                            if(tipMsg){
+                                var confirmMsg = "還有很多組喔...乁( ◔ ౪◔)「 \n確定要提示?";
+                                if(!confirm(confirmMsg)){
+                                    return false;
+                                }
+                            }
+                            c1.removeClass("active").addClass("tip");
+                            c2.removeClass("active").addClass("tip");
+                            c3.removeClass("active").addClass("tip");
+                        }
+                        return true;
+                    }
+                }
+            }
+        }
+        if(isShowTip) {
+            alert("看什麼看!!!!沒有了啦!!!!還不快加牌!!!!")
+        }
+        return false;
+    }
+
+    function getRandom() {
+        return Math.floor(Math.random() * deck.length);
+    }
+    function setRandomShape(card_id, isNew) {
+        var shape;
+        var card_num = $("canvas").length;
+
+        if (isNew || card_num <= 12) {
+            var n = getRandom();
+            shape = deck[n];
+            deck.remove(n);
+            $("#setCard_num").text(deck.length);
+        } else {
+            var last1Canvas;
+            if(card_num>15) {
+                last1Canvas = $("canvas:gt(14)").eq(0);
+            } else {
+                last1Canvas = $("canvas:gt(11)").eq(0);
+            }
+            shape = last1Canvas.attr("shape");
+            last1Canvas.remove();
+        }
+        if(!shape){
+            return;
+        }
+
+        //draw
+        var canvas = document.getElementById(card_id);
+        canvas.setAttribute("shape", shape);
+        var ctx = canvas.getContext("2d");
+        shape = shape.split("");
+        draw(ctx, shape[1], shape[0], shape[2], shape[3]);
+    }
+
+    // C 橢圓型, D菱形, W波浪 @ R紅色, G綠色, P紫色 @ B空白, H斜線, F填滿
+    function draw(ctx, amount, shape, color, stuff) {
+        var x;
+        if(amount == 1){
+            x = [125];
+        } else if(amount == 2){
+            x = [80, 170];
+        } else if(amount == 3){
+            x = [50, 125, 200];
+        }
+
+        if(color == "R"){
+            var colorCode = "#ff3c3c";
+            ctx.strokeStyle=colorCode;
+            ctx.fillStyle=colorCode;
+        } else if(color == "G"){
+            var colorCode = "#14a510";
+            ctx.strokeStyle=colorCode;
+            ctx.fillStyle=colorCode;
+        } else if(color == "P"){
+            var colorCode = "#5f00b1";
+            ctx.strokeStyle=colorCode;
+            ctx.fillStyle=colorCode;
+        }
+        if(stuff == "B"){
+            ctx.fillStyle="white";
+        }
+
+        ctx.beginPath();
+        ctx.lineWidth = 4;
+        for(var i = 0; i < x.length; i++) {
+            if (shape == "D") {
+                ctx_D(ctx, x[i]);
+            } else if (shape == "C") {
+                ctx_C(ctx, x[i]);
+            } else if (shape == "W") {
+                ctx_W(ctx, x[i]);
+            }
+        }
+        ctx.stroke();
+
+        if (stuff == "H") {
+            ctx.beginPath();
+            ctx.lineWidth = 1;
+            for (var i = 0; i < x.length; i++) {
+                if (shape == "D") {
+                    ctx_DH(ctx, x[i]);
+                } else if (shape == "C") {
+                    ctx_CH(ctx, x[i]);
+                } else if (shape == "W") {
+                    ctx_WH(ctx, x[i]);
+                }
+            }
+            ctx.stroke();
+        }
+
+
+        if(stuff == "B"){
+            // ctx.fillStyle="white";
+        } else if(stuff == "H"){
+        } else if(stuff == "F"){
+            ctx.fill();
+        }
+    }
+
+    //菱形
+    function ctx_D(ctx, startPoint) {
+        ctx.moveTo(startPoint, 75);
+        ctx.lineTo(startPoint+25, 25);
+        ctx.lineTo(startPoint+50, 75);
+        ctx.lineTo(startPoint+25, 125);
+        ctx.lineTo(startPoint, 75);
+    }
+
+    //菱形H
+    function ctx_DH(ctx, startPoint) {
+        for(var i = 0; i < 17; i++){
+            var x1 =0, x2 = 0;
+            var y = 35 + (i*5);
+            if(i<8){
+                x1 = startPoint +20 - (i*2.5);
+                x2 = x1+((i+2)*5);
+            } else {
+                x1 = startPoint -20 + (i*2.5);
+                x2 = x1+((18-i)*5);
+            }
+            ctx.moveTo(x1, y);
+            ctx.lineTo(x2, y);
+        }
+    }
+
+    //圓形
+    function ctx_C(ctx, startPoint) {
+        ctx.moveTo(startPoint, 50);
+        ctx.lineTo(startPoint, 100);
+        ctx.arcTo(startPoint, 125, startPoint+25, 125, 25);
+        ctx.arcTo(startPoint+50, 125, startPoint+50, 100, 25);
+        ctx.lineTo(startPoint+50, 50);
+        ctx.arcTo(startPoint+50, 25, startPoint+25, 25, 25);
+        ctx.arcTo(startPoint, 25, startPoint, 50, 25);
+    }
+
+    //圓形H
+    function ctx_CH(ctx, startPoint) {
+        for(var i = 0; i < 2; i++){
+            ctx.moveTo(startPoint + ((2-i)*5) , 30 + (i*5));
+            ctx.lineTo(startPoint + 50-((2-i)*5) , 30 + (i*5));
+        }
+        for(var i = 0; i < 15; i++){
+            ctx.moveTo(startPoint, 40 + (i*5));
+            ctx.lineTo(startPoint + 50, 40 + (i*5));
+        }
+        for(var i = 0; i < 2; i++){
+            ctx.moveTo(startPoint + ((i+1)*5) , 115 + (i*5));
+            ctx.lineTo(startPoint + 50 - ((i+1)*5) , 115 + (i*5));
+        }
+    }
+
+    //波浪
+    function ctx_W(ctx, startPoint) {
+        ctx.moveTo(startPoint, 25);
+        ctx.quadraticCurveTo(startPoint+48, 22, startPoint+48, 50);
+        ctx.quadraticCurveTo(startPoint+44, 63, startPoint+38, 80);
+        ctx.quadraticCurveTo(startPoint+26, 100, startPoint+48, 120);
+
+        ctx.quadraticCurveTo(startPoint-17, 120, startPoint+3, 80);
+        ctx.quadraticCurveTo(startPoint+13, 60, startPoint+13, 50);
+        ctx.quadraticCurveTo(startPoint+18, 30, startPoint-5, 22);
+    }
+
+    //波浪H
+    function ctx_WH(ctx, startPoint) {
+        for(var i = 0; i < 18; i++){
+            if(i<3) {
+                ctx.moveTo(startPoint + ((i + 1) * 5), 30 + (i * 5));
+                ctx.lineTo(startPoint + 30 + ((i + 1) * 5), 30 + (i * 5));
+            } else if(i<5){
+                ctx.moveTo(startPoint + ((i+1)*3), 30 + (i * 5));
+                ctx.lineTo(startPoint + 30 + ((i+1)*4), 30 + (i * 5));
+            } else if(i<9){
+                ctx.moveTo(startPoint + ((10-i)*3), 30 + (i * 5));
+                ctx.lineTo(startPoint + 44 , 30 + (i * 5));
+            } else if(i<10){
+                ctx.moveTo(startPoint + ((10-i)*3), 30 + (i * 5));
+                ctx.lineTo(startPoint + 42 , 30 + (i * 5));
+            } else if(i>15){
+                ctx.moveTo(startPoint + ((i-15) * 5), 30 + (i * 5));
+                ctx.lineTo(startPoint + 42 , 30 + (i * 5));
+            } else {
+                ctx.moveTo(startPoint, 30 + (i * 5));
+                ctx.lineTo(startPoint + 35, 30 + (i * 5));
+            }
+        }
+    }
+</script>
+</html>
