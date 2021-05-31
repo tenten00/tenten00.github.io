@@ -418,38 +418,41 @@
 
     //波浪
     function ctx_W(ctx, startPoint) {
-        ctx.moveTo(startPoint, 25);
-        ctx.quadraticCurveTo(startPoint+48, 22, startPoint+48, 50);
-        ctx.quadraticCurveTo(startPoint+44, 63, startPoint+38, 80);
-        ctx.quadraticCurveTo(startPoint+26, 100, startPoint+48, 120);
+        ctx.moveTo(startPoint, 30);
+        ctx.bezierCurveTo(startPoint+40, 60, startPoint-40, 90, startPoint, 120);
+        ctx.quadraticCurveTo(startPoint+20, 130, startPoint+40, 120);
 
-        ctx.quadraticCurveTo(startPoint-17, 120, startPoint+3, 80);
-        ctx.quadraticCurveTo(startPoint+13, 60, startPoint+13, 50);
-        ctx.quadraticCurveTo(startPoint+18, 30, startPoint-5, 22);
+        ctx.bezierCurveTo(startPoint, 90, startPoint+80, 60, startPoint+40, 30);
+        ctx.quadraticCurveTo(startPoint+20, 20, startPoint, 30);
+
     }
 
     //波浪H
     function ctx_WH(ctx, startPoint) {
-        for(var i = 0; i < 18; i++){
+        for(var i = 0; i < 19; i++){
             if(i<3) {
-                ctx.moveTo(startPoint + ((i + 1) * 5), 30 + (i * 5));
-                ctx.lineTo(startPoint + 30 + ((i + 1) * 5), 30 + (i * 5));
-            } else if(i<5){
-                ctx.moveTo(startPoint + ((i+1)*3), 30 + (i * 5));
-                ctx.lineTo(startPoint + 30 + ((i+1)*4), 30 + (i * 5));
-            } else if(i<9){
-                ctx.moveTo(startPoint + ((10-i)*3), 30 + (i * 5));
-                ctx.lineTo(startPoint + 44 , 30 + (i * 5));
+                ctx.moveTo(startPoint + (i * 5), 30 + (i * 5));
+                ctx.lineTo(startPoint + 30 + ((i + 1) * 6), 30 + (i * 5));
+            } else if(i<5) {
+                ctx.moveTo(startPoint + (i * 3), 30 + (i * 5));
+                ctx.lineTo(startPoint + 50, 30 + (i * 5));
+            } else if(i<7){
+                ctx.moveTo(startPoint + ((9-i)*3), 30 + (i * 5));
+                ctx.lineTo(startPoint + 50 , 30 + (i * 5));
             } else if(i<10){
                 ctx.moveTo(startPoint + ((10-i)*3), 30 + (i * 5));
-                ctx.lineTo(startPoint + 42 , 30 + (i * 5));
-            } else if(i>15){
-                ctx.moveTo(startPoint + ((i-15) * 5), 30 + (i * 5));
-                ctx.lineTo(startPoint + 42 , 30 + (i * 5));
-            } else {
-                ctx.moveTo(startPoint, 30 + (i * 5));
-                ctx.lineTo(startPoint + 35, 30 + (i * 5));
+                ctx.lineTo(startPoint + 43 , 30 + (i * 5));
+            } else if(i<12){
+                ctx.moveTo(startPoint + ((10-i)*3), 30 + (i * 5));
+                ctx.lineTo(startPoint + 35 , 30 + (i * 5));
+            } else if(i<15){
+                ctx.moveTo(startPoint + ((10-i)*3), 30 + (i * 5));
+                ctx.lineTo(startPoint + 30 , 30 + (i * 5));
+            } else if(i<19){
+                ctx.moveTo(startPoint + ((i-19) * 2), 30 + (i * 5));
+                ctx.lineTo(startPoint + (i-14) + 30 , 30 + (i * 5));
             }
+
         }
     }
 </script>
